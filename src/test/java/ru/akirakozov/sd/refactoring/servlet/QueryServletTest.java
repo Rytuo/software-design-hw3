@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.SQLException;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,6 +13,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import ru.akirakozov.sd.refactoring.entity.Product;
 
 public class QueryServletTest extends ServletTest {
 
@@ -45,11 +45,8 @@ public class QueryServletTest extends ServletTest {
         assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_OK);
         String contentType = response.headers().firstValue("content-type").orElse(null);
         assertThat(contentType).contains("text/html");
-        Map<String, Long> product = getMaxProduct();
-        for (String key : product.keySet()) {
-            long value = product.get(key);
-            assertThat(response.body()).contains(key + "\t" + value);
-        }
+        Product product = getMaxProduct();
+        assertThat(response.body()).contains(product.getName() + "\t" + product.getPrice());
     }
 
     @Test
@@ -69,11 +66,8 @@ public class QueryServletTest extends ServletTest {
         assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_OK);
         String contentType = response.headers().firstValue("content-type").orElse(null);
         assertThat(contentType).contains("text/html");
-        Map<String, Long> product = getMinProduct();
-        for (String key : product.keySet()) {
-            long value = product.get(key);
-            assertThat(response.body()).contains(key + "\t" + value);
-        }
+        Product product = getMinProduct();
+        assertThat(response.body()).contains(product.getName() + "\t" + product.getPrice());
     }
 
     @Test

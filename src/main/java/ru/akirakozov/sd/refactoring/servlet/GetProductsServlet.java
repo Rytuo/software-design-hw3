@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import ru.akirakozov.sd.refactoring.entity.Product;
+
 /**
  * @author akirakozov
  */
@@ -25,7 +27,8 @@ public class GetProductsServlet extends HttpServlet {
                 while (rs.next()) {
                     String  name = rs.getString("name");
                     long price  = rs.getLong("price");
-                    response.getWriter().println(name + "\t" + price + "</br>");
+                    Product product = new Product(name, price);
+                    response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
                 }
                 response.getWriter().println("</body></html>");
 

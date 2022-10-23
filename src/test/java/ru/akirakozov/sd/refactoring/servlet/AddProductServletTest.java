@@ -13,6 +13,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import ru.akirakozov.sd.refactoring.entity.Product;
 
 public class AddProductServletTest extends ServletTest {
 
@@ -28,10 +29,9 @@ public class AddProductServletTest extends ServletTest {
 
     @Test
     void testAddProduct() throws IOException, InterruptedException, SQLException {
-        String name = "test" + System.currentTimeMillis();
-        long price = System.currentTimeMillis();
+        Product product = new Product("test" + System.currentTimeMillis(), System.currentTimeMillis());
         String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH
-                + String.format("?%s=%s&%s=%s", PRODUCT_NAME_PARAM, name, PRODUCT_PRICE_PARAM, price);
+                + String.format("?%s=%s&%s=%s", PRODUCT_NAME_PARAM, product.getName(), PRODUCT_PRICE_PARAM, product.getPrice());
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
@@ -43,7 +43,9 @@ public class AddProductServletTest extends ServletTest {
         String contentType = response.headers().firstValue("content-type").orElse(null);
         assertThat(contentType).contains("text/html");
         assertThat(response.body().trim()).isEqualTo("OK");
-        assertThat(getProducts().get(name)).isEqualTo(price);
+        assertThat(getProducts().stream()
+                .anyMatch(product::isSame))
+                .isTrue();
     }
 
     @Test

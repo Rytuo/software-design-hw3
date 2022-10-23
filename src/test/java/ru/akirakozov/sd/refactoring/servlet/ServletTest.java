@@ -6,15 +6,16 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+
+import ru.akirakozov.sd.refactoring.entity.Product;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class ServletTest {
@@ -73,42 +74,48 @@ public abstract class ServletTest {
         }
     }
 
-    Map<String, Long> getProducts() throws SQLException {
+    List<Product> getProducts() throws SQLException {
         try (Connection c = DriverManager.getConnection(DB_URL)) {
             try (Statement stmt = c.createStatement()) {
-                Map<String, Long> products = new HashMap<>();
+                List<Product> products = new ArrayList<>();
                 ResultSet resultSet = stmt.executeQuery(GET_PRODUCTS);
                 while (resultSet.next()) {
-                    products.put(resultSet.getString("name"),
-                            resultSet.getLong("price"));
+                    products.add(new Product(
+                            resultSet.getString("name"),
+                            resultSet.getLong("price")
+                    ));
                 }
                 return products;
             }
         }
     }
 
-    Map<String, Long> getMaxProduct() throws SQLException {
+    Product getMaxProduct() throws SQLException {
         try (Connection c = DriverManager.getConnection(DB_URL)) {
             try (Statement stmt = c.createStatement()) {
                 ResultSet resultSet = stmt.executeQuery(GET_MAX_PRODUCT);
                 if (resultSet.next()) {
-                    return Map.of(resultSet.getString("name"),
-                            resultSet.getLong("price"));
+                    return new Product(
+                            resultSet.getString("name"),
+                            resultSet.getLong("price")
+                    );
                 }
-                return Collections.emptyMap();
+                return null;
             }
         }
     }
 
-    Map<String, Long> getMinProduct() throws SQLException {
+    Product getMinProduct() throws SQLException {
         try (Connection c = DriverManager.getConnection(DB_URL)) {
             try (Statement stmt = c.createStatement()) {
                 ResultSet resultSet = stmt.executeQuery(GET_MIN_PRODUCT);
                 if (resultSet.next()) {
-                    return Map.of(resultSet.getString("name"),
-                            resultSet.getLong("price"));
+                    return new Product(
+                            resultSet.getString("name"),
+                            resultSet.getLong("price")
+                    );
                 }
-                return Collections.emptyMap();
+                return null;
             }
         }
     }
