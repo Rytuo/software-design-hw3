@@ -27,7 +27,7 @@ public class QueryServlet extends HttpServlet {
 
                     while (rs.next()) {
                         String  name = rs.getString("name");
-                        int price  = rs.getInt("price");
+                        long price  = rs.getLong("price");
                         response.getWriter().println(name + "\t" + price + "</br>");
                     }
                     response.getWriter().println("</body></html>");
@@ -49,7 +49,7 @@ public class QueryServlet extends HttpServlet {
 
                     while (rs.next()) {
                         String  name = rs.getString("name");
-                        int price  = rs.getInt("price");
+                        long price  = rs.getLong("price");
                         response.getWriter().println(name + "\t" + price + "</br>");
                     }
                     response.getWriter().println("</body></html>");
@@ -70,7 +70,7 @@ public class QueryServlet extends HttpServlet {
                     response.getWriter().println("Summary price: ");
 
                     if (rs.next()) {
-                        response.getWriter().println(rs.getInt(1));
+                        response.getWriter().println(rs.getLong(1));
                     }
                     response.getWriter().println("</body></html>");
 
@@ -90,7 +90,7 @@ public class QueryServlet extends HttpServlet {
                     response.getWriter().println("Number of products: ");
 
                     if (rs.next()) {
-                        response.getWriter().println(rs.getInt(1));
+                        response.getWriter().println(rs.getLong(1));
                     }
                     response.getWriter().println("</body></html>");
 
