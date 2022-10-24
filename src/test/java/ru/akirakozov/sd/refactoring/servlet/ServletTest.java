@@ -1,11 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import java.net.http.HttpClient;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +11,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
+import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,6 +35,7 @@ public abstract class ServletTest {
 
     static final String SERVER_URL = "http://localhost";
 
+    SQLExecutor executor;
     Server server;
     HttpClient client;
 
@@ -45,11 +43,8 @@ public abstract class ServletTest {
 
     @BeforeAll
     void beforeAll() throws Exception {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            Statement stmt = c.createStatement();
-            stmt.executeUpdate(INIT_DB);
-            stmt.close();
-        }
+        executor = new SQLExecutor(DB_URL);
+        executor.executeUpdate(INIT_DB);
 
         this.server = new Server(SERVER_PORT);
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -66,34 +61,29 @@ public abstract class ServletTest {
         server.stop();
     }
 
-    void addProduct(String name, long price) throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
-                stmt.executeUpdate(ADD_PRODUCT + String.format("(\"%s\", %s)", name, price));
-            }
-        }
+    void addProduct(String name, long price) {
+        executor.executeUpdate(ADD_PRODUCT + String.format("(\"%s\", %s)", name, price));
     }
 
-    List<Product> getProducts() throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
+    List<Product> getProducts() {
+        return executor.executeQuery(GET_PRODUCTS, resultSet -> {
+            try {
                 List<Product> products = new ArrayList<>();
-                ResultSet resultSet = stmt.executeQuery(GET_PRODUCTS);
                 while (resultSet.next()) {
-                    products.add(new Product(
-                            resultSet.getString("name"),
-                            resultSet.getLong("price")
-                    ));
+                    String name = resultSet.getString("name");
+                    long price = resultSet.getLong("price");
+                    products.add(new Product(name, price));
                 }
                 return products;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
-        }
+        });
     }
 
-    Product getMaxProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
-                ResultSet resultSet = stmt.executeQuery(GET_MAX_PRODUCT);
+    Product getMaxProduct() {
+        return executor.executeQuery(GET_MAX_PRODUCT, resultSet -> {
+            try {
                 if (resultSet.next()) {
                     return new Product(
                             resultSet.getString("name"),
@@ -101,14 +91,15 @@ public abstract class ServletTest {
                     );
                 }
                 return null;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
-        }
+        });
     }
 
-    Product getMinProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
-                ResultSet resultSet = stmt.executeQuery(GET_MIN_PRODUCT);
+    Product getMinProduct() {
+        return executor.executeQuery(GET_MIN_PRODUCT, resultSet -> {
+            try {
                 if (resultSet.next()) {
                     return new Product(
                             resultSet.getString("name"),
@@ -116,31 +107,35 @@ public abstract class ServletTest {
                     );
                 }
                 return null;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
-        }
+        });
     }
 
-    Long getProductsSum() throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
-                ResultSet resultSet = stmt.executeQuery(GET_PRODUCTS_PRICE_SUM);
+    Long getProductsSum() {
+        return executor.executeQuery(GET_PRODUCTS_PRICE_SUM, resultSet -> {
+            try {
                 if (resultSet.next()) {
                     return resultSet.getLong(1);
                 }
                 return -1L;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
-        }
+        });
     }
 
-    Long getProductsCount() throws SQLException {
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
-            try (Statement stmt = c.createStatement()) {
-                ResultSet resultSet = stmt.executeQuery(GET_PRODUCTS_COUNT);
+    Long getProductsCount() {
+        return executor.executeQuery(GET_PRODUCTS_COUNT, resultSet -> {
+            try {
                 if (resultSet.next()) {
                     return resultSet.getLong(1);
                 }
                 return -1L;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
-        }
+        });
     }
 }

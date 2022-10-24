@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,11 +24,11 @@ public class QueryServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new QueryServlet()), SERVER_QUERY_COMMAND_PATH);
+        contextHandler.addServlet(new ServletHolder(new QueryServlet(executor)), SERVER_QUERY_COMMAND_PATH);
     }
 
     @Test
-    void testMax() throws SQLException, IOException, InterruptedException {
+    void testMax() throws IOException, InterruptedException {
         String name1 = "test1" + System.currentTimeMillis();
         long price1 = System.currentTimeMillis();
         addProduct(name1, price1);
@@ -50,7 +49,7 @@ public class QueryServletTest extends ServletTest {
     }
 
     @Test
-    void testMin() throws SQLException, IOException, InterruptedException {
+    void testMin() throws IOException, InterruptedException {
         String name1 = "test1" + System.currentTimeMillis();
         long price1 = System.currentTimeMillis();
         addProduct(name1, price1);
@@ -71,7 +70,7 @@ public class QueryServletTest extends ServletTest {
     }
 
     @Test
-    void testSum() throws IOException, InterruptedException, SQLException {
+    void testSum() throws IOException, InterruptedException {
         String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_QUERY_COMMAND_PATH + SUM_COMMAND;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -87,7 +86,7 @@ public class QueryServletTest extends ServletTest {
     }
 
     @Test
-    void testCount() throws IOException, InterruptedException, SQLException {
+    void testCount() throws IOException, InterruptedException {
         String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_QUERY_COMMAND_PATH + COUNT_COMMAND;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()

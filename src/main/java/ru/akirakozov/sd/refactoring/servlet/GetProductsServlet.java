@@ -1,14 +1,16 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
+import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 /**
@@ -16,29 +18,36 @@ import ru.akirakozov.sd.refactoring.entity.Product;
  */
 public class GetProductsServlet extends HttpServlet {
 
+    private final SQLExecutor executor;
+
+    public GetProductsServlet(SQLExecutor executor) {
+        this.executor = executor;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
-                response.getWriter().println("<html><body>");
 
-                while (rs.next()) {
-                    String  name = rs.getString("name");
-                    long price  = rs.getLong("price");
-                    Product product = new Product(name, price);
-                    response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
+        String query = "SELECT * FROM PRODUCT";
+        List<Product> productsList = this.executor.executeQuery(query, resultSet -> {
+            try {
+                List<Product> products = new ArrayList<>();
+                while (resultSet.next()) {
+                    String name = resultSet.getString("name");
+                    long price = resultSet.getLong("price");
+                    products.add(new Product(name, price));
                 }
-                response.getWriter().println("</body></html>");
-
-                rs.close();
-                stmt.close();
+                return products;
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
             }
+        });
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        response.getWriter().println("<html><body>");
+        String productsView = productsList.stream()
+                .map(product -> product.getName() + "\t" + product.getPrice() + "</br>")
+                .collect(Collectors.joining());
+        response.getWriter().println(productsView);
+        response.getWriter().println("</body></html>");
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

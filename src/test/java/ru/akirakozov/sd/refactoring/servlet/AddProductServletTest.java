@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,11 +23,11 @@ public class AddProductServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new AddProductServlet()), SERVER_ADD_PRODUCT_PATH);
+        contextHandler.addServlet(new ServletHolder(new AddProductServlet(executor)), SERVER_ADD_PRODUCT_PATH);
     }
 
     @Test
-    void testAddProduct() throws IOException, InterruptedException, SQLException {
+    void testAddProduct() throws IOException, InterruptedException {
         Product product = new Product("test" + System.currentTimeMillis(), System.currentTimeMillis());
         String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH
                 + String.format("?%s=%s&%s=%s", PRODUCT_NAME_PARAM, product.getName(), PRODUCT_PRICE_PARAM, product.getPrice());
