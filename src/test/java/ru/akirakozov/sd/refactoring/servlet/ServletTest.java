@@ -1,8 +1,6 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import java.net.http.HttpClient;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jetty.server.Server;
@@ -12,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,6 +35,7 @@ public abstract class ServletTest {
     static final String SERVER_URL = "http://localhost";
 
     SQLExecutor executor;
+    SQLResultCollector collector;
     Server server;
     HttpClient client;
 
@@ -45,6 +45,8 @@ public abstract class ServletTest {
     void beforeAll() throws Exception {
         executor = new SQLExecutor(DB_URL);
         executor.executeUpdate(INIT_DB);
+
+        collector = new SQLResultCollector();
 
         this.server = new Server(SERVER_PORT);
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -66,76 +68,22 @@ public abstract class ServletTest {
     }
 
     List<Product> getProducts() {
-        return executor.executeQuery(GET_PRODUCTS, resultSet -> {
-            try {
-                List<Product> products = new ArrayList<>();
-                while (resultSet.next()) {
-                    String name = resultSet.getString("name");
-                    long price = resultSet.getLong("price");
-                    products.add(new Product(name, price));
-                }
-                return products;
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
+        return executor.executeQuery(GET_PRODUCTS, collector::collectProducts);
     }
 
     Product getMaxProduct() {
-        return executor.executeQuery(GET_MAX_PRODUCT, resultSet -> {
-            try {
-                if (resultSet.next()) {
-                    return new Product(
-                            resultSet.getString("name"),
-                            resultSet.getLong("price")
-                    );
-                }
-                return null;
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
+        return executor.executeQuery(GET_MAX_PRODUCT, collector::collectProduct);
     }
 
     Product getMinProduct() {
-        return executor.executeQuery(GET_MIN_PRODUCT, resultSet -> {
-            try {
-                if (resultSet.next()) {
-                    return new Product(
-                            resultSet.getString("name"),
-                            resultSet.getLong("price")
-                    );
-                }
-                return null;
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
+        return executor.executeQuery(GET_MIN_PRODUCT, collector::collectProduct);
     }
 
     Long getProductsSum() {
-        return executor.executeQuery(GET_PRODUCTS_PRICE_SUM, resultSet -> {
-            try {
-                if (resultSet.next()) {
-                    return resultSet.getLong(1);
-                }
-                return -1L;
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
+        return executor.executeQuery(GET_PRODUCTS_PRICE_SUM, collector::collectLong);
     }
 
     Long getProductsCount() {
-        return executor.executeQuery(GET_PRODUCTS_COUNT, resultSet -> {
-            try {
-                if (resultSet.next()) {
-                    return resultSet.getLong(1);
-                }
-                return -1L;
-            } catch (SQLException e) {
-                throw new RuntimeException(e.getMessage());
-            }
-        });
+        return executor.executeQuery(GET_PRODUCTS_COUNT, collector::collectLong);
     }
 }

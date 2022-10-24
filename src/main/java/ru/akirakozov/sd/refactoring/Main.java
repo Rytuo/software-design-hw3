@@ -5,6 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.servlet.AddProductServlet;
 import ru.akirakozov.sd.refactoring.servlet.GetProductsServlet;
 import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
@@ -15,6 +16,7 @@ import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
 public class Main {
     public static void main(String[] args) throws Exception {
         SQLExecutor executor = new SQLExecutor("jdbc:sqlite:test.db");
+        SQLResultCollector collector = new SQLResultCollector();
 
         String sql = "CREATE TABLE IF NOT EXISTS PRODUCT" +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
@@ -29,8 +31,8 @@ public class Main {
         server.setHandler(context);
 
         context.addServlet(new ServletHolder(new AddProductServlet(executor)), "/add-product");
-        context.addServlet(new ServletHolder(new GetProductsServlet(executor)),"/get-products");
-        context.addServlet(new ServletHolder(new QueryServlet(executor)),"/query");
+        context.addServlet(new ServletHolder(new GetProductsServlet(executor, collector)),"/get-products");
+        context.addServlet(new ServletHolder(new QueryServlet(executor, collector)),"/query");
 
         server.start();
         server.join();
