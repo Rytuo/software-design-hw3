@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
@@ -17,17 +18,6 @@ import ru.akirakozov.sd.refactoring.entity.Product;
 public abstract class ServletTest {
 
     static final String DB_URL = "jdbc:sqlite:test.db";
-
-    private static final String INIT_DB = "CREATE TABLE IF NOT EXISTS PRODUCT" +
-            "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-            " NAME           TEXT    NOT NULL, " +
-            " PRICE          INT     NOT NULL)";
-    private static final String ADD_PRODUCT = "insert into PRODUCT (NAME, PRICE) values ";
-    private static final String GET_PRODUCTS = "select * from PRODUCT";
-    private static final String GET_MAX_PRODUCT = "SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1";
-    private static final String GET_MIN_PRODUCT = "SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1";
-    private static final String GET_PRODUCTS_PRICE_SUM = "SELECT SUM(price) FROM PRODUCT";
-    private static final String GET_PRODUCTS_COUNT = "SELECT COUNT(*) FROM PRODUCT";
 
     private static final String SERVER_CONTEXT_PATH = "/";
     static final int SERVER_PORT = 8081;
@@ -44,7 +34,7 @@ public abstract class ServletTest {
     @BeforeAll
     void beforeAll() throws Exception {
         executor = new SQLExecutor(DB_URL);
-        executor.executeUpdate(INIT_DB);
+        executor.executeUpdate(SQLQueries.INIT.getQuery());
 
         collector = new SQLResultCollector();
 
@@ -64,26 +54,26 @@ public abstract class ServletTest {
     }
 
     void addProduct(String name, long price) {
-        executor.executeUpdate(ADD_PRODUCT + String.format("(\"%s\", %s)", name, price));
+        executor.executeUpdate(String.format(SQLQueries.ADD_PRODUCTS.getQuery(), "(\"" + name + "\", " + price + ")"));
     }
 
     List<Product> getProducts() {
-        return executor.executeQuery(GET_PRODUCTS, collector::collectProducts);
+        return executor.executeQuery(SQLQueries.GET_ALL_PRODUCTS.getQuery(), collector::collectProducts);
     }
 
     Product getMaxProduct() {
-        return executor.executeQuery(GET_MAX_PRODUCT, collector::collectProduct);
+        return executor.executeQuery(SQLQueries.GET_MAX_PRICE_PRODUCT.getQuery(), collector::collectProduct);
     }
 
     Product getMinProduct() {
-        return executor.executeQuery(GET_MIN_PRODUCT, collector::collectProduct);
+        return executor.executeQuery(SQLQueries.GET_MIN_PRICE_PRODUCT.getQuery(), collector::collectProduct);
     }
 
     Long getProductsSum() {
-        return executor.executeQuery(GET_PRODUCTS_PRICE_SUM, collector::collectLong);
+        return executor.executeQuery(SQLQueries.GET_PRICE_SUM.getQuery(), collector::collectLong);
     }
 
     Long getProductsCount() {
-        return executor.executeQuery(GET_PRODUCTS_COUNT, collector::collectLong);
+        return executor.executeQuery(SQLQueries.GET_PRODUCTS_COUNT.getQuery(), collector::collectLong);
     }
 }

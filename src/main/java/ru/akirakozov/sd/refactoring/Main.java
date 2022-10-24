@@ -5,6 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.servlet.AddProductServlet;
 import ru.akirakozov.sd.refactoring.servlet.GetProductsServlet;
@@ -18,11 +19,7 @@ public class Main {
         SQLExecutor executor = new SQLExecutor("jdbc:sqlite:test.db");
         SQLResultCollector collector = new SQLResultCollector();
 
-        String sql = "CREATE TABLE IF NOT EXISTS PRODUCT" +
-                "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                " NAME           TEXT    NOT NULL, " +
-                " PRICE          INT     NOT NULL)";
-        executor.executeUpdate(sql);
+        executor.executeUpdate(SQLQueries.INIT.getQuery());
 
         Server server = new Server(8081);
 

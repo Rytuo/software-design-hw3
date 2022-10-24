@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
@@ -28,8 +29,7 @@ public class GetProductsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        String query = "SELECT * FROM PRODUCT";
-        List<Product> productsList = this.executor.executeQuery(query, collector::collectProducts);
+        List<Product> productsList = this.executor.executeQuery(SQLQueries.GET_ALL_PRODUCTS.getQuery(), collector::collectProducts);
 
         response.getWriter().println("<html><body>");
         String productsView = productsList.stream()

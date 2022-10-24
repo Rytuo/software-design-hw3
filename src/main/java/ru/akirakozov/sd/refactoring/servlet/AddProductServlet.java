@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 /**
@@ -26,8 +27,7 @@ public class AddProductServlet extends HttpServlet {
         long price = Long.parseLong(request.getParameter("price"));
         Product product = new Product(name, price);
 
-        String sql = "INSERT INTO PRODUCT " +
-                "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
+        String sql = String.format(SQLQueries.ADD_PRODUCTS.getQuery(), "(\"" + product.getName() + "\"," + product.getPrice() + ")");
         this.executor.executeUpdate(sql);
 
         response.setContentType("text/html");

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
@@ -30,8 +31,7 @@ public class QueryServlet extends HttpServlet {
         String command = request.getParameter("command");
 
         if ("max".equals(command)) {
-            String query = "SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1";
-            List<Product> products = this.executor.executeQuery(query, collector::collectProducts);
+            List<Product> products = this.executor.executeQuery(SQLQueries.GET_MAX_PRICE_PRODUCT.getQuery(), collector::collectProducts);
             response.getWriter().println("<html><body>");
             response.getWriter().println("<h1>Product with max price: </h1>");
             String productsView = products.stream()
@@ -40,8 +40,7 @@ public class QueryServlet extends HttpServlet {
             response.getWriter().println(productsView);
             response.getWriter().println("</body></html>");
         } else if ("min".equals(command)) {
-            String query = "SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1";
-            List<Product> products = this.executor.executeQuery(query, collector::collectProducts);
+            List<Product> products = this.executor.executeQuery(SQLQueries.GET_MIN_PRICE_PRODUCT.getQuery(), collector::collectProducts);
             response.getWriter().println("<html><body>");
             response.getWriter().println("<h1>Product with max price: </h1>");
             String productsView = products.stream()
@@ -50,16 +49,14 @@ public class QueryServlet extends HttpServlet {
             response.getWriter().println(productsView);
             response.getWriter().println("</body></html>");
         } else if ("sum".equals(command)) {
-            String query = "SELECT SUM(price) FROM PRODUCT";
-            Long sum = this.executor.executeQuery(query, collector::collectLong);
+            Long sum = this.executor.executeQuery(SQLQueries.GET_PRICE_SUM.getQuery(), collector::collectLong);
 
             response.getWriter().println("<html><body>");
             response.getWriter().println("Summary price: ");
             response.getWriter().println(sum == null ? "" : sum);
             response.getWriter().println("</body></html>");
         } else if ("count".equals(command)) {
-            String query = "SELECT COUNT(*) FROM PRODUCT";
-            Long count = this.executor.executeQuery(query, collector::collectLong);
+            Long count = this.executor.executeQuery(SQLQueries.GET_PRODUCTS_COUNT.getQuery(), collector::collectLong);
 
             response.getWriter().println("<html><body>");
             response.getWriter().println("Number of products: ");
