@@ -24,6 +24,9 @@ public enum SQLQueries {
     ),
     GET_PRODUCTS_COUNT(
             "SELECT COUNT(*) FROM PRODUCT"
+    ),
+    DELETE_ALL_PRODUCTS(
+            "DELETE FROM PRODUCT"
     );
 
     private final String query;
