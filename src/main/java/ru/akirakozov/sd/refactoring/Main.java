@@ -16,7 +16,7 @@ import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        SQLExecutor executor = new SQLExecutor("jdbc:sqlite:test.db");
+        SQLExecutor executor = new SQLExecutor("jdbc:sqlite:prod.db");
         SQLResultCollector collector = new SQLResultCollector();
 
         executor.executeUpdate(SQLQueries.INIT.getQuery());
