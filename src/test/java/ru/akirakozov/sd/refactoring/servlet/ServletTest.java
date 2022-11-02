@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.entity.Product;
+import ru.akirakozov.sd.refactoring.view.HtmlResponseBuilder;
+import ru.akirakozov.sd.refactoring.view.ResponseBuilder;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class ServletTest {
@@ -22,6 +24,8 @@ public abstract class ServletTest {
 
     @Mock
     Controller controller;
+
+    ResponseBuilder responseBuilder = new HtmlResponseBuilder();
 
     Server server;
     HttpClient client;

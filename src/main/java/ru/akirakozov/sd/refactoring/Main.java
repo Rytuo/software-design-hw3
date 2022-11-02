@@ -11,6 +11,8 @@ import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
 import ru.akirakozov.sd.refactoring.servlet.AddProductServlet;
 import ru.akirakozov.sd.refactoring.servlet.GetProductsServlet;
 import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
+import ru.akirakozov.sd.refactoring.view.HtmlResponseBuilder;
+import ru.akirakozov.sd.refactoring.view.ResponseBuilder;
 
 /**
  * @author akirakozov
@@ -21,6 +23,7 @@ public class Main {
                 new SQLExecutor("jdbc:sqlite:prod.db"),
                 new SQLResultCollector()
         );
+        ResponseBuilder responseBuilder = new HtmlResponseBuilder();
 
         controller.init();
 
@@ -30,9 +33,9 @@ public class Main {
         context.setContextPath("/");
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(new AddProductServlet(controller)), "/add-product");
-        context.addServlet(new ServletHolder(new GetProductsServlet(controller)),"/get-products");
-        context.addServlet(new ServletHolder(new QueryServlet(controller)),"/query");
+        context.addServlet(new ServletHolder(new AddProductServlet(controller, responseBuilder)), "/add-product");
+        context.addServlet(new ServletHolder(new GetProductsServlet(controller, responseBuilder)),"/get-products");
+        context.addServlet(new ServletHolder(new QueryServlet(controller, responseBuilder)),"/query");
 
         server.start();
         server.join();

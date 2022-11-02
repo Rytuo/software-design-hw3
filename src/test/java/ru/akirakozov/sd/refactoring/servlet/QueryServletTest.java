@@ -27,7 +27,7 @@ public class QueryServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new QueryServlet(controller)), SERVER_QUERY_COMMAND_PATH);
+        contextHandler.addServlet(new ServletHolder(new QueryServlet(controller, responseBuilder)), SERVER_QUERY_COMMAND_PATH);
     }
 
     @Test

@@ -7,16 +7,16 @@ package ru.akirakozov.sd.refactoring.view;
  */
 public class HtmlTagBuilder {
 
-    public String document(String content) {
-        return wrapTag("html", wrapTag("body", content));
+    public String document(String... content) {
+        return wrapTag("html", wrapTag("body", String.join("", content)));
     }
 
     public String br() {
         return wrapTag("br", "");
     }
 
-    public String h1(String content) {
-        return wrapTag("h1", content);
+    public String h1(String... content) {
+        return wrapTag("h1", String.join("", content));
     }
 
     private String wrapTag(String tag, String content) {

@@ -29,7 +29,7 @@ public class AddProductServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new AddProductServlet(controller)), SERVER_ADD_PRODUCT_PATH);
+        contextHandler.addServlet(new ServletHolder(new AddProductServlet(controller, responseBuilder)), SERVER_ADD_PRODUCT_PATH);
     }
 
     @Test

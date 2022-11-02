@@ -8,18 +8,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.entity.Product;
-import ru.akirakozov.sd.refactoring.view.HtmlTagBuilder;
+import ru.akirakozov.sd.refactoring.view.ResponseBuilder;
 
 /**
  * @author akirakozov
  */
 public class QueryServlet extends HttpServlet {
 
-    private final HtmlTagBuilder tb = new HtmlTagBuilder();
     private final Controller controller;
+    private final ResponseBuilder responseBuilder;
 
-    public QueryServlet(Controller controller) {
+    public QueryServlet(Controller controller, ResponseBuilder responseBuilder) {
         this.controller = controller;
+        this.responseBuilder = responseBuilder;
     }
 
     @Override
@@ -29,29 +30,23 @@ public class QueryServlet extends HttpServlet {
         String responseContent;
         if ("max".equals(command)) {
             Product product = controller.getMaxPriceProduct().get(0);
-            responseContent = tb.document(
-                    tb.h1("Product with max price: ") +
-                            product.getName() + "\t" + product.getPrice() + tb.br()
-            );
+            responseContent = responseBuilder.createMaxTemplate(product);
         } else if ("min".equals(command)) {
             Product product = controller.getMinPriceProduct().get(0);
-            responseContent = tb.document(
-                    tb.h1("Product with min price: ") +
-                            product.getName() + "\t" + product.getPrice() + tb.br()
-            );
+            responseContent = responseBuilder.createMinTemplate(product);
         } else if ("sum".equals(command)) {
             Long sum = controller.getPriceSum();
-            responseContent = tb.document("Summary price: " + (sum == null ? "" : sum));
+            responseContent = responseBuilder.createSumTemplate(sum);
         } else if ("count".equals(command)) {
             Long count = controller.getProductsCount();
-            responseContent = tb.document("Number of products: " + (count == null ? "" : count));
+            responseContent = responseBuilder.createCountTemplate(count);
         } else {
-            responseContent = "Unknown command: " + command;
+            responseContent = responseBuilder.createUnknownCommandTemplate(command);
         }
-        response.getWriter().println(responseContent);
 
-        response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(responseBuilder.getContentType());
+        response.getWriter().println(responseContent);
     }
 
 }
