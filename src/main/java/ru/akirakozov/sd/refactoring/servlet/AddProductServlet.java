@@ -1,13 +1,13 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
-import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLController;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 /**
@@ -15,23 +15,26 @@ import ru.akirakozov.sd.refactoring.entity.Product;
  */
 public class AddProductServlet extends HttpServlet {
 
-    private final SQLExecutor executor;
+    private final SQLController controller;
 
-    public AddProductServlet(SQLExecutor executor) {
-        this.executor = executor;
+    public AddProductServlet(SQLController controller) {
+        this.controller = controller;
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String name = request.getParameter("name");
-        long price = Long.parseLong(request.getParameter("price"));
-        Product product = new Product(name, price);
+        Product product = parseRequest(request);
 
-        String sql = String.format(SQLQueries.ADD_PRODUCTS.getQuery(), "(\"" + product.getName() + "\"," + product.getPrice() + ")");
-        this.executor.executeUpdate(sql);
+        controller.addProducts(List.of(product));
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("OK");
+    }
+
+    private Product parseRequest(HttpServletRequest request) {
+        String name = request.getParameter("name");
+        long price = Long.parseLong(request.getParameter("price"));
+        return new Product(name, price);
     }
 }

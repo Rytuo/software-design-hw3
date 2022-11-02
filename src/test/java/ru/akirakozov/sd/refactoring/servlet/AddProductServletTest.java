@@ -4,14 +4,20 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 public class AddProductServletTest extends ServletTest {
@@ -23,18 +29,21 @@ public class AddProductServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new AddProductServlet(executor)), SERVER_ADD_PRODUCT_PATH);
+        contextHandler.addServlet(new ServletHolder(new AddProductServlet(controller)), SERVER_ADD_PRODUCT_PATH);
     }
 
     @Test
     void testAddProduct() throws IOException, InterruptedException {
-        Product product = new Product("test" + System.currentTimeMillis(), System.currentTimeMillis());
-        String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH
+        Product product = createUniqueProduct();
+        String uri = getBaseUrl() + SERVER_ADD_PRODUCT_PATH
                 + String.format("?%s=%s&%s=%s", PRODUCT_NAME_PARAM, product.getName(), PRODUCT_PRICE_PARAM, product.getPrice());
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
                 .build();
+
+        when(controller.addProducts(any()))
+                .thenReturn(1);
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -42,15 +51,18 @@ public class AddProductServletTest extends ServletTest {
         String contentType = response.headers().firstValue("content-type").orElse(null);
         assertThat(contentType).contains("text/html");
         assertThat(response.body().trim()).isEqualTo("OK");
-        assertThat(getProducts().stream()
-                .anyMatch(product::isSame))
-                .isTrue();
+
+        ArgumentCaptor<List<Product>> productsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(controller).addProducts(productsCaptor.capture());
+        List<Product> capturedProducts = productsCaptor.getValue();
+        assertThat(capturedProducts.size()).isOne();
+        assertTrue(product.isSame(capturedProducts.get(0)));
     }
 
     @Test
     void testNoProductName() throws IOException, InterruptedException {
         long price = 123;
-        String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH;
+        String uri = getBaseUrl() + SERVER_ADD_PRODUCT_PATH;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
@@ -65,7 +77,7 @@ public class AddProductServletTest extends ServletTest {
     @Test
     void testNoProductPrice() throws IOException, InterruptedException {
         String name = "test1";
-        String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH;
+        String uri = getBaseUrl() + SERVER_ADD_PRODUCT_PATH;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .header(PRODUCT_NAME_PARAM, name)
@@ -81,7 +93,7 @@ public class AddProductServletTest extends ServletTest {
     void testInvalidProductPrice() throws IOException, InterruptedException {
         String name = "test1";
         String price = "abc";
-        String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_ADD_PRODUCT_PATH;
+        String uri = getBaseUrl() + SERVER_ADD_PRODUCT_PATH;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))

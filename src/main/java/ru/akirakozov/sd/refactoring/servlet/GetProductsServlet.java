@@ -8,9 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
-import ru.akirakozov.sd.refactoring.controller.sql.SQLQueries;
-import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
+import ru.akirakozov.sd.refactoring.controller.sql.SQLController;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 /**
@@ -18,18 +16,15 @@ import ru.akirakozov.sd.refactoring.entity.Product;
  */
 public class GetProductsServlet extends HttpServlet {
 
-    private final SQLExecutor executor;
-    private final SQLResultCollector collector;
+    private final SQLController controller;
 
-    public GetProductsServlet(SQLExecutor executor, SQLResultCollector collector) {
-        this.executor = executor;
-        this.collector = collector;
+    public GetProductsServlet(SQLController controller) {
+        this.controller = controller;
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        List<Product> productsList = this.executor.executeQuery(SQLQueries.GET_ALL_PRODUCTS.getQuery(), collector::collectProducts);
+        List<Product> productsList = controller.getAllProducts();
 
         response.getWriter().println("<html><body>");
         String productsView = productsList.stream()

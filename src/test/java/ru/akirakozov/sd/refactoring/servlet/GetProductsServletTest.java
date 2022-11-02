@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,6 +13,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import ru.akirakozov.sd.refactoring.entity.Product;
+
 
 public class GetProductsServletTest extends ServletTest {
 
@@ -19,16 +24,19 @@ public class GetProductsServletTest extends ServletTest {
 
     @Override
     void addServlet(ServletContextHandler contextHandler) {
-        contextHandler.addServlet(new ServletHolder(new GetProductsServlet(executor, collector)), SERVER_GET_PRODUCT_PATH);
+        contextHandler.addServlet(new ServletHolder(new GetProductsServlet(controller)), SERVER_GET_PRODUCT_PATH);
     }
 
     @Test
     void testGetProducts() throws IOException, InterruptedException {
-        String name = "test1" + System.currentTimeMillis();
-        long price = System.currentTimeMillis();
-        addProduct(name, price);
+        List<Product> products = List.of(
+                createUniqueProduct(),
+                createUniqueProduct()
+        );
+        when(controller.getAllProducts())
+                .thenReturn(products);
 
-        String uri = SERVER_URL + ":" + SERVER_PORT + SERVER_GET_PRODUCT_PATH;
+        String uri = getBaseUrl() + SERVER_GET_PRODUCT_PATH;
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(uri))
@@ -36,9 +44,12 @@ public class GetProductsServletTest extends ServletTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+        verify(controller).getAllProducts();
         assertThat(response.statusCode()).isEqualTo(HttpServletResponse.SC_OK);
         String contentType = response.headers().firstValue("content-type").orElse(null);
         assertThat(contentType).contains("text/html");
-        assertThat(response.body()).contains(name + "\t" + price);
+        for (var product : products) {
+            assertThat(response.body()).contains(product.getName() + "\t" + product.getPrice());
+        }
     }
 }
