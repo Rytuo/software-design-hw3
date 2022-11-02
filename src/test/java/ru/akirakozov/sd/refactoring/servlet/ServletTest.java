@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import ru.akirakozov.sd.refactoring.controller.sql.SQLController;
+import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,7 +21,7 @@ public abstract class ServletTest {
     private static final String SERVER_CONTEXT_PATH = "/";
 
     @Mock
-    SQLController controller;
+    Controller controller;
 
     Server server;
     HttpClient client;

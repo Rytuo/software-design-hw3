@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ru.akirakozov.sd.refactoring.controller.sql.SQLController;
+import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 /**
@@ -16,9 +16,9 @@ import ru.akirakozov.sd.refactoring.entity.Product;
  */
 public class QueryServlet extends HttpServlet {
 
-    private final SQLController controller;
+    private final Controller controller;
 
-    public QueryServlet(SQLController controller) {
+    public QueryServlet(Controller controller) {
         this.controller = controller;
     }
 

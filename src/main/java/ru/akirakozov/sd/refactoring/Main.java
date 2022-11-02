@@ -4,6 +4,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLController;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLExecutor;
 import ru.akirakozov.sd.refactoring.controller.sql.SQLResultCollector;
@@ -16,7 +17,7 @@ import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        SQLController controller = new SQLController(
+        Controller controller = new SQLController(
                 new SQLExecutor("jdbc:sqlite:prod.db"),
                 new SQLResultCollector()
         );
