@@ -7,13 +7,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.Controller;
-import ru.akirakozov.sd.refactoring.entity.Product;
 import ru.akirakozov.sd.refactoring.view.ResponseBuilder;
 
 /**
  * @author akirakozov
  */
 public class QueryServlet extends HttpServlet {
+
+    private static final String COMMAND_PARAMETER = "command";
+
+    private static final String MAX_COMMAND = "max";
+    private static final String MIN_COMMAND = "min";
+    private static final String SUM_COMMAND = "sum";
+    private static final String COUNT_COMMAND = "count";
 
     private final Controller controller;
     private final ResponseBuilder responseBuilder;
@@ -25,28 +31,20 @@ public class QueryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String command = request.getParameter("command");
-
-        String responseContent;
-        if ("max".equals(command)) {
-            Product product = controller.getMaxPriceProduct().get(0);
-            responseContent = responseBuilder.createMaxTemplate(product);
-        } else if ("min".equals(command)) {
-            Product product = controller.getMinPriceProduct().get(0);
-            responseContent = responseBuilder.createMinTemplate(product);
-        } else if ("sum".equals(command)) {
-            Long sum = controller.getPriceSum();
-            responseContent = responseBuilder.createSumTemplate(sum);
-        } else if ("count".equals(command)) {
-            Long count = controller.getProductsCount();
-            responseContent = responseBuilder.createCountTemplate(count);
-        } else {
-            responseContent = responseBuilder.createUnknownCommandTemplate(command);
-        }
-
+        String command = request.getParameter(COMMAND_PARAMETER);
+        String responseContent = getResponseContent(command);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(responseBuilder.getContentType());
         response.getWriter().println(responseContent);
     }
 
+    private String getResponseContent(String command) {
+        return switch(command) {
+            case MAX_COMMAND -> responseBuilder.createMaxTemplate(controller.getMaxPriceProduct().get(0));
+            case MIN_COMMAND -> responseBuilder.createMinTemplate(controller.getMinPriceProduct().get(0));
+            case SUM_COMMAND -> responseBuilder.createSumTemplate(controller.getPriceSum());
+            case COUNT_COMMAND -> responseBuilder.createCountTemplate(controller.getProductsCount());
+            default -> responseBuilder.createUnknownCommandTemplate(command);
+        };
+    }
 }

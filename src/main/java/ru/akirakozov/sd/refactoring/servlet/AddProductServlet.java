@@ -16,6 +16,9 @@ import ru.akirakozov.sd.refactoring.view.ResponseBuilder;
  */
 public class AddProductServlet extends HttpServlet {
 
+    private static final String PRODUCT_NAME_PARAMETER = "name";
+    private static final String PRODUCT_PRICE_PARAMETER = "price";
+
     private final Controller controller;
     private final ResponseBuilder responseBuilder;
 
@@ -34,8 +37,8 @@ public class AddProductServlet extends HttpServlet {
     }
 
     private Product parseRequest(HttpServletRequest request) {
-        String name = request.getParameter("name");
-        long price = Long.parseLong(request.getParameter("price"));
+        String name = request.getParameter(PRODUCT_NAME_PARAMETER);
+        long price = Long.parseLong(request.getParameter(PRODUCT_PRICE_PARAMETER));
         return new Product(name, price);
     }
 }
