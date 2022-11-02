@@ -10,12 +10,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import ru.akirakozov.sd.refactoring.controller.Controller;
 import ru.akirakozov.sd.refactoring.entity.Product;
+import ru.akirakozov.sd.refactoring.view.HtmlTagBuilder;
 
 /**
  * @author akirakozov
  */
 public class GetProductsServlet extends HttpServlet {
 
+    private final HtmlTagBuilder tb = new HtmlTagBuilder();
     private final Controller controller;
 
     public GetProductsServlet(Controller controller) {
@@ -24,14 +26,14 @@ public class GetProductsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        List<Product> productsList = controller.getAllProducts();
+        List<Product> products = controller.getAllProducts();
 
-        response.getWriter().println("<html><body>");
-        String productsView = productsList.stream()
-                .map(product -> product.getName() + "\t" + product.getPrice() + "</br>")
-                .collect(Collectors.joining());
-        response.getWriter().println(productsView);
-        response.getWriter().println("</body></html>");
+        String responseContent = tb.document(
+                products.stream()
+                        .map(product -> product.getName() + "\t" + product.getPrice() + tb.br())
+                        .collect(Collectors.joining())
+        );
+        response.getWriter().println(responseContent);
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
